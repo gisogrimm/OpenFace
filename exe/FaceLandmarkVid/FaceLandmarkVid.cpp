@@ -41,6 +41,9 @@
 #include <Visualizer.h>
 #include <VisualizationUtils.h>
 
+#include <lo/lo.h>
+#include <lo/lo_cpp.h>
+
 #define INFO_STREAM( stream ) \
 std::cout << stream << std::endl
 
@@ -111,6 +114,8 @@ int main(int argc, char **argv)
 
 	int sequence_number = 0;
 
+        lo::Address a("localhost", "9877");
+
 	while (true) // this is not a for loop as we might also be reading from a webcam
 	{
 
@@ -141,12 +146,28 @@ int main(int argc, char **argv)
 			{
 				GazeAnalysis::EstimateGaze(face_model, gazeDirection0, sequence_reader.fx, sequence_reader.fy, sequence_reader.cx, sequence_reader.cy, true);
 				GazeAnalysis::EstimateGaze(face_model, gazeDirection1, sequence_reader.fx, sequence_reader.fy, sequence_reader.cx, sequence_reader.cy, false);
-			}
+
+                                auto gazeAngle = GazeAnalysis::GetGazeAngle(
+                                    gazeDirection0, gazeDirection1);
+                                a.send("/gaze", "ff", gazeAngle(0),
+                                       gazeAngle(1));
+                        }
 
 			// Work out the pose of the head from the tracked model
 			cv::Vec6d pose_estimate = LandmarkDetector::GetPose(face_model, sequence_reader.fx, sequence_reader.fy, sequence_reader.cx, sequence_reader.cy);
 
-			// Keeping track of FPS
+                        a.send("/headpos", "fff", pose_estimate[0],
+                               pose_estimate[1], pose_estimate[2]);
+                        a.send("/headrot", "fff", pose_estimate[3],
+                               pose_estimate[4], pose_estimate[5]);
+
+                        auto landmarks = face_model.GetShape(
+                            sequence_reader.fx, sequence_reader.fy,
+                            sequence_reader.cx, sequence_reader.cy);
+                        for(size_t k=0;k<landmarks.cols;++k)
+                          a.send("/lm"+std::to_string(k), "fff", landmarks(0,k)-pose_estimate[0], landmarks(1,k)-pose_estimate[1], landmarks(2,k)-pose_estimate[2]);
+
+                        // Keeping track of FPS
 			fps_tracker.AddFrame();
 
 			// Displaying the tracking visualizations

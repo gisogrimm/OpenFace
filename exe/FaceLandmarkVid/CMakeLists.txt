@@ -6,5 +6,6 @@ target_link_libraries(FaceLandmarkVid LandmarkDetector)
 target_link_libraries(FaceLandmarkVid FaceAnalyser)
 target_link_libraries(FaceLandmarkVid GazeAnalyser)
 target_link_libraries(FaceLandmarkVid Utilities)
+target_link_libraries(FaceLandmarkVid lo)
 
 install (TARGETS FaceLandmarkVid DESTINATION bin)
