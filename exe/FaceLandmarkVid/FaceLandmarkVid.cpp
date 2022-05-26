@@ -36,6 +36,8 @@
 // Libraries for landmark detection (includes CLNF and CLM modules)
 #include "LandmarkCoreIncludes.h"
 #include "GazeEstimation.h"
+#include <Face_utils.h>
+#include <FaceAnalyser.h>
 
 #include <SequenceCapture.h>
 #include <Visualizer.h>
@@ -89,9 +91,12 @@ int main(int argc, char **argv)
 
 	LandmarkDetector::FaceModelParameters det_parameters(arguments);
 
-	// The modules that are being used for tracking
-	LandmarkDetector::CLNF face_model(det_parameters.model_location);
-	if (!face_model.loaded_successfully)
+        FaceAnalysis::FaceAnalyserParameters face_analysis_params(arguments);
+        FaceAnalysis::FaceAnalyser face_analyser(face_analysis_params);
+
+        // The modules that are being used for tracking
+        LandmarkDetector::CLNF face_model(det_parameters.model_location);
+        if (!face_model.loaded_successfully)
 	{
 		std::cout << "ERROR: Could not load the landmark detector" << std::endl;
 		return 1;
@@ -114,7 +119,8 @@ int main(int argc, char **argv)
 
 	int sequence_number = 0;
 
-        lo::Address a("localhost", "9877");
+        lo::Address to_tascar("localhost", "9877");
+        lo::Address to_blender("localhost", "9999");
 
 	while (true) // this is not a for loop as we might also be reading from a webcam
 	{
@@ -149,23 +155,69 @@ int main(int argc, char **argv)
 
                                 auto gazeAngle = GazeAnalysis::GetGazeAngle(
                                     gazeDirection0, gazeDirection1);
-                                a.send("/gaze", "ff", gazeAngle(0),
+                                to_tascar.send("/gaze", "ff", gazeAngle(0),
                                        gazeAngle(1));
                         }
 
 			// Work out the pose of the head from the tracked model
 			cv::Vec6d pose_estimate = LandmarkDetector::GetPose(face_model, sequence_reader.fx, sequence_reader.fy, sequence_reader.cx, sequence_reader.cy);
 
-                        a.send("/headpos", "fff", pose_estimate[0],
-                               pose_estimate[1], pose_estimate[2]);
-                        a.send("/headrot", "fff", pose_estimate[3],
-                               pose_estimate[4], pose_estimate[5]);
+                        to_tascar.send("/headpos", "fff", pose_estimate[0], pose_estimate[1],
+                                       pose_estimate[2]);
+                        to_tascar.send("/headrot", "fff", pose_estimate[3], pose_estimate[4],
+                                       pose_estimate[5]);
 
-                        auto landmarks = face_model.GetShape(
-                            sequence_reader.fx, sequence_reader.fy,
-                            sequence_reader.cx, sequence_reader.cy);
-                        for(size_t k=0;k<landmarks.cols;++k)
-                          a.send("/lm"+std::to_string(k), "fff", landmarks(0,k)-pose_estimate[0], landmarks(1,k)-pose_estimate[1], landmarks(2,k)-pose_estimate[2]);
+                        if(detection_success) {
+
+                          auto landmarks =
+                              face_model.GetShape(sequence_reader.fx, sequence_reader.fy,
+                                                  sequence_reader.cx, sequence_reader.cy);
+                          for(size_t k = 0; k < landmarks.cols; ++k)
+                            to_tascar.send("/lm" + std::to_string(k), "fff",
+                                           landmarks(0, k) - pose_estimate[0],
+                                           landmarks(1, k) - pose_estimate[1],
+                                           landmarks(2, k) - pose_estimate[2]);
+
+                          double mouthopen =
+                              std::max(0.0, sqrt(pow(landmarks(0, 57) - landmarks(0, 51), 2.0) +
+                                                 pow(landmarks(1, 57) - landmarks(1, 51), 2.0) +
+                                                 pow(landmarks(2, 57) - landmarks(2, 51), 2.0)) -
+                                                8.0) /
+                              10.0;
+
+                          double mouthwidth =
+                              1.0 -
+                              std::min(
+                                  1.0,
+                                  std::max(0.0,
+                                           sqrt(pow(landmarks(0, 54) - landmarks(0, 48), 2.0) +
+                                                pow(landmarks(1, 54) - landmarks(1, 48), 2.0) +
+                                                pow(landmarks(2, 54) - landmarks(2, 48), 2.0)) -
+                                               30.0) /
+                                      30.0);
+
+                          to_blender.send("/maartje", "sfff", "/lipsync", (float)mouthwidth, 0.0f,
+                                          (float)mouthopen);
+                          to_blender.send("/maartje", "sfff", "/headGaze", pose_estimate[3],
+                                          pose_estimate[4], pose_estimate[5]);
+                          to_tascar.send("/mouthopen", "f", mouthopen);
+                          to_tascar.send("/mouthwidth", "f", mouthwidth);
+
+                          face_analyser.AddNextFrame(rgb_image, face_model.detected_landmarks,
+                                                     face_model.detection_success,
+                                                     sequence_reader.time_stamp,
+                                                     sequence_reader.IsWebcam());
+
+                          //face_analyser.PredictStaticAUsAndComputeFeatures(
+                          //   rgb_image, face_model.detected_landmarks);
+
+                          auto aus_intensity = face_analyser.GetCurrentAUsReg();
+                          auto aus_presence = face_analyser.GetCurrentAUsClass();
+                          for(size_t k = 0; k < aus_intensity.size(); ++k)
+                            to_tascar.send("/au" + std::to_string(k) + "i", "f", aus_intensity[k]);
+                          for(size_t k = 0; k < aus_presence.size(); ++k)
+                            to_tascar.send("/au" + std::to_string(k) + "p", "f", aus_presence[k]);
+                        }
 
                         // Keeping track of FPS
 			fps_tracker.AddFrame();
@@ -205,3 +257,9 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+
+/*
+ * Local Variables:
+ * compile-command: "make -C ../../build"
+ * End:
+ */

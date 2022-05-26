@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<session license="CC0" duration="3600">
+  <modules>
+    <datalogging>
+      <osc path="/gaze" size="2"/>
+      <osc path="/headpos" size="3"/>
+      <osc path="/headrot" size="3"/>
+      <osc path="/lm48" size="3"/>
+      <osc path="/lm54" size="3"/>
+      <osc path="/lm51" size="3"/>
+      <osc path="/lm57" size="3"/>
+      <osc path="/mouthopen" size="1"/>
+      <osc path="/mouthwidth" size="1"/>
+      <osc path="/au0i" size="1"/>
+      <osc path="/au1i" size="1"/>
+      <osc path="/au2i" size="1"/>
+      <osc path="/au3i" size="1"/>
+      <osc path="/au4i" size="1"/>
+      <osc path="/au5i" size="1"/>
+      <osc path="/au6i" size="1"/>
+      <osc path="/au7i" size="1"/>
+      <osc path="/au8i" size="1"/>
+      <osc path="/au9i" size="1"/>
+      <osc path="/au10i" size="1"/>
+      <osc path="/au11i" size="1"/>
+      <osc path="/au12i" size="1"/>
+      <osc path="/au13i" size="1"/>
+      <osc path="/au14i" size="1"/>
+      <osc path="/au15i" size="1"/>
+      <osc path="/au16i" size="1"/>
+      <osc path="/au0p" size="1"/>
+      <osc path="/au1p" size="1"/>
+      <osc path="/au2p" size="1"/>
+      <osc path="/au3p" size="1"/>
+      <osc path="/au4p" size="1"/>
+      <osc path="/au5p" size="1"/>
+      <osc path="/au6p" size="1"/>
+      <osc path="/au7p" size="1"/>
+      <osc path="/au8p" size="1"/>
+      <osc path="/au9p" size="1"/>
+      <osc path="/au10p" size="1"/>
+      <osc path="/au11p" size="1"/>
+      <osc path="/au12p" size="1"/>
+      <osc path="/au13p" size="1"/>
+      <osc path="/au14p" size="1"/>
+      <osc path="/au15p" size="1"/>
+      <osc path="/au16p" size="1"/>
+      <osc path="/au17p" size="1"/>
+    </datalogging>
+  </modules>
+</session>

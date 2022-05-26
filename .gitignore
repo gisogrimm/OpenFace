@@ -105,3 +105,9 @@ lib/local/CppInerop/Debug/
 
 # IDE-generated folders
 .idea
+
+# TASCAR data files:
+unnamed_*.mat
+
+# Emacs backup files:
+*~
