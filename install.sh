@@ -57,29 +57,32 @@ sudo apt-get -y install zip
 sudo apt-get -y install libopenblas-dev liblapack-dev
 sudo apt-get -y install libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev
 sudo apt-get -y install libtbb2 libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev
+sudo apt-get -y install libopencv-dev
 echo "Essential dependencies installed."
 
-# OpenCV Dependency
-echo "Downloading OpenCV..."
-wget https://github.com/opencv/opencv/archive/4.1.0.zip
-unzip 4.1.0.zip
-cd opencv-4.1.0
-mkdir -p build
-cd build
-echo "Installing OpenCV..."
-cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_TBB=ON -D WITH_CUDA=OFF -D BUILD_SHARED_LIBS=OFF ..
-make -j4
-sudo make install
-cd ../..
-rm 4.1.0.zip
-sudo rm -r opencv-4.1.0
-echo "OpenCV installed."
+## OpenCV Dependency
+#echo "Downloading OpenCV..."
+#wget https://github.com/opencv/opencv/archive/4.1.0.zip
+#unzip 4.1.0.zip
+#cd opencv-4.1.0
+#mkdir -p build
+#cd build
+#echo "Installing OpenCV..."
+#cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_TBB=ON -D WITH_CUDA=OFF -D BUILD_SHARED_LIBS=OFF ..
+#make -j4
+#sudo make install
+#cd ../..
+#rm 4.1.0.zip
+#sudo rm -r opencv-4.1.0
+#echo "OpenCV installed."
 
 # dlib dependecy
 echo "Downloading dlib"
-wget http://dlib.net/files/dlib-19.13.tar.bz2;
-tar xf dlib-19.13.tar.bz2;
-cd dlib-19.13;
+#wget http://dlib.net/files/dlib-19.13.tar.bz2;
+#tar xf dlib-19.13.tar.bz2;
+#cd dlib-19.13;
+git clone https://github.com/davisking/dlib.git
+cd dlib
 mkdir -p build;
 cd build;
 echo "Installing dlib"
@@ -88,7 +91,6 @@ cmake --build . --config Release;
 sudo make install;
 sudo ldconfig;
 cd ../..;    
-rm -r dlib-19.13.tar.bz2
 echo "dlib installed"
 
 # OpenFace installation
