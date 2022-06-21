@@ -5,12 +5,12 @@ PointerAlignment: Left
 BraceWrapping:
   AfterFunction: true
   BeforeCatch: true
-  BeforeElse: false
-  AfterExternBlock: false
-  AfterNamespace: false
-  AfterControlStatement: false
+  BeforeElse: true
+  AfterExternBlock: true
+  AfterNamespace: true
+  AfterControlStatement: true
 BreakBeforeBraces: Custom
-SpaceBeforeParens: Never
+SpaceBeforeParens: ControlStatements
 SpaceInEmptyParentheses: false
 SpacesInCStyleCastParentheses: false
 SpacesInParentheses: false
