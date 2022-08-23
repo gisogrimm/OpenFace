@@ -119,7 +119,7 @@ int main(int argc, char **argv)
 
 	int sequence_number = 0;
 
-        lo::Address to_tascar("localhost", "9877");
+        lo::Address to_tascar("lidhan", "9877");
         lo::Address to_blender("localhost", "9999");
 
 	while (true) // this is not a for loop as we might also be reading from a webcam
@@ -147,6 +147,8 @@ int main(int argc, char **argv)
 			cv::Point3f gazeDirection0(0, 0, -1);
 			cv::Point3f gazeDirection1(0, 0, -1);
 
+			float gaze1 = 0.0f;
+			float gaze2 = 0.0f;
 			// If tracking succeeded and we have an eye model, estimate gaze
 			if (detection_success && face_model.eye_model)
 			{
@@ -157,6 +159,8 @@ int main(int argc, char **argv)
                                     gazeDirection0, gazeDirection1);
                                 to_tascar.send("/gaze", "ff", gazeAngle(0),
                                        gazeAngle(1));
+				gaze1 = gazeAngle(0);
+				gaze2 = gazeAngle(1);
                         }
 
 			// Work out the pose of the head from the tracked model
@@ -172,11 +176,32 @@ int main(int argc, char **argv)
                           auto landmarks =
                               face_model.GetShape(sequence_reader.fx, sequence_reader.fy,
                                                   sequence_reader.cx, sequence_reader.cy);
-                          for(size_t k = 0; k < landmarks.cols; ++k)
-                            to_tascar.send("/lm" + std::to_string(k), "fff",
-                                           landmarks(0, k) - pose_estimate[0],
-                                           landmarks(1, k) - pose_estimate[1],
-                                           landmarks(2, k) - pose_estimate[2]);
+                          //for(size_t k = 0; k < landmarks.cols; ++k)
+                          //  to_tascar.send("/lm" + std::to_string(k), "fff",
+                          //                 landmarks(0, k) - pose_estimate[0],
+                          //                 landmarks(1, k) - pose_estimate[1],
+                          //                 landmarks(2, k) - pose_estimate[2]);
+			  to_tascar.send("/anglm","ffffffffffffffffffffffffffffffffffffffffffff",
+					 pose_estimate[0], pose_estimate[1],
+					 pose_estimate[2],
+					 pose_estimate[3], pose_estimate[4],
+					 pose_estimate[5],
+					 gaze1,
+					 gaze2,
+					 landmarks(0,8),landmarks(1,8),landmarks(2,8),
+					 landmarks(0,19),landmarks(1,19),landmarks(2,19),
+					 landmarks(0,24),landmarks(1,24),landmarks(2,24),
+					 landmarks(0,27),landmarks(1,27),landmarks(2,27),
+					 landmarks(0,38),landmarks(1,38),landmarks(2,38),
+					 landmarks(0,40),landmarks(1,40),landmarks(2,40),
+					 landmarks(0,43),landmarks(1,43),landmarks(2,43),
+					 landmarks(0,47),landmarks(1,47),landmarks(2,47),
+					 landmarks(0,48),landmarks(1,48),landmarks(2,48),
+					 landmarks(0,54),landmarks(1,54),landmarks(2,54),
+					 landmarks(0,51),landmarks(1,51),landmarks(2,51),
+					 landmarks(0,57),landmarks(1,57),landmarks(2,57));
+
+			  
 
                           double mouthopen =
                               std::max(0.0, sqrt(pow(landmarks(0, 57) - landmarks(0, 51), 2.0) +
@@ -211,12 +236,12 @@ int main(int argc, char **argv)
                           //face_analyser.PredictStaticAUsAndComputeFeatures(
                           //   rgb_image, face_model.detected_landmarks);
 
-                          auto aus_intensity = face_analyser.GetCurrentAUsReg();
-                          auto aus_presence = face_analyser.GetCurrentAUsClass();
-                          for(size_t k = 0; k < aus_intensity.size(); ++k)
-                            to_tascar.send("/au" + std::to_string(k) + "i", "f", aus_intensity[k]);
-                          for(size_t k = 0; k < aus_presence.size(); ++k)
-                            to_tascar.send("/au" + std::to_string(k) + "p", "f", aus_presence[k]);
+                          //auto aus_intensity = face_analyser.GetCurrentAUsReg();
+                          //auto aus_presence = face_analyser.GetCurrentAUsClass();
+                          //for(size_t k = 0; k < aus_intensity.size(); ++k)
+                          //  to_tascar.send("/au" + std::to_string(k) + "i", "f", aus_intensity[k]);
+                          //for(size_t k = 0; k < aus_presence.size(); ++k)
+                          //  to_tascar.send("/au" + std::to_string(k) + "p", "f", aus_presence[k]);
                         }
 
                         // Keeping track of FPS
